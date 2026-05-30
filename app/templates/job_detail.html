@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Video Job #{{ job.id }}</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; color: #1d2433; background: #f6f7f9; }
+    header { background: #111827; color: white; padding: 20px 28px; }
+    main { max-width: 980px; margin: 0 auto; padding: 24px; }
+    a { color: #155eef; text-decoration: none; }
+    section { background: white; border: 1px solid #e5e7eb; padding: 18px; margin-bottom: 14px; border-radius: 6px; }
+    pre { white-space: pre-wrap; overflow-x: auto; }
+    button { border: 0; border-radius: 6px; padding: 10px 12px; background: #155eef; color: white; cursor: pointer; margin: 4px 4px 4px 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/jobs" style="color:#bfdbfe;">Back to jobs</a>
+    <h1>Video Job #{{ job.id }}</h1>
+  </header>
+  <main>
+    <section>
+      <p><strong>Source review item:</strong> {{ job.review_item_id }}</p>
+      <p><strong>Format:</strong> {{ job.format_type }}</p>
+      <p><strong>Status:</strong> {{ job.status }}</p>
+      <p><strong>Render readiness:</strong> {{ "ready" if job.status == "ready_for_render" else "not ready" }}</p>
+      <p><strong>Package:</strong> {{ job.package_path }}</p>
+    </section>
+    <section>
+      <h2>{{ job.title }}</h2>
+      <p>{{ job.description }}</p>
+      <p>{{ job.hashtags|join(" ") }}</p>
+      <p><strong>Thumbnail text:</strong> {{ job.thumbnail_text }}</p>
+      <p><strong>Thumbnail ideas:</strong> {{ job.thumbnail_ideas|join(", ") }}</p>
+      <p><strong>AI disclosure:</strong> {{ job.ai_disclosure_recommendation }}</p>
+    </section>
+    <section>
+      <h2>Script / Outline</h2>
+      {% if job.format_type == "short" %}
+        <pre>{{ job.script }}</pre>
+      {% else %}
+        <ol>{% for line in job.outline %}<li>{{ line }}</li>{% endfor %}</ol>
+      {% endif %}
+    </section>
+    <section>
+      <h2>Scene Plan</h2>
+      <pre>{{ job.scene_plan }}</pre>
+    </section>
+  </main>
+</body>
+</html>
+

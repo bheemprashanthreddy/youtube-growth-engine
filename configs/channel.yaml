@@ -1,0 +1,31 @@
+channel:
+  name: CuriousSignal
+  handle: "@CuriousSignal-z9t"
+  gmail: bheemreddyautomationflows@gmail.com
+  publishing_mode: private_upload_first_manual_publish_after_review
+  positioning: >
+    CuriousSignal explains the strange, fast-moving, and surprising things people
+    are suddenly searching for, from technology and internet culture to money,
+    science, business, and global trends.
+  formats:
+    - youtube_shorts
+    - long_form
+  content_pillars:
+    - Internet trends explained
+    - Technology and AI shifts
+    - Money/business curiosity
+    - Science/future discoveries
+    - Strange global stories
+    - Hidden systems behind everyday things
+  audience_psychology_patterns:
+    - hidden reason
+    - why now
+    - nobody noticed
+    - surprising truth
+    - before/after change
+    - mistake people make
+    - future consequence
+    - money behind the trend
+    - internet behavior shift
+    - fear of missing out
+

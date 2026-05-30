@@ -1,0 +1,42 @@
+trend_sources:
+  manual_seed:
+    enabled: true
+    source_score: 55
+  youtube_search:
+    enabled: true
+    max_results: 10
+    query_terms:
+      - strange trends explained
+      - why is everyone searching
+      - AI trend explained
+      - business trend explained
+  youtube_suggestions:
+    enabled: true
+    seed_terms:
+      - why is
+      - what is
+      - ai
+      - money
+      - internet trend
+  reddit:
+    enabled: true
+    subreddits:
+      - technology
+      - internetisbeautiful
+      - futurology
+      - explainlikeimfive
+      - OutOfTheLoop
+    limit: 10
+  rss:
+    enabled: true
+    limit_per_feed: 10
+  pytrends:
+    enabled: true
+    region: US
+  wikipedia_current_events:
+    enabled: true
+    page_title: Portal:Current_events
+  hackernews:
+    enabled: true
+    limit: 15
+

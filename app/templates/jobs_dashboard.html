@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CuriousSignal Jobs</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; color: #1d2433; background: #f6f7f9; }
+    header { background: #111827; color: white; padding: 20px 28px; }
+    main { max-width: 1180px; margin: 0 auto; padding: 24px; }
+    a { color: #155eef; text-decoration: none; }
+    table { width: 100%; border-collapse: collapse; background: white; border: 1px solid #e5e7eb; }
+    th, td { padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: top; }
+    th { background: #f1f5f9; font-size: 13px; color: #475569; }
+    .status { display: inline-block; border-radius: 6px; padding: 4px 8px; background: #e5e7eb; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CuriousSignal Production Queue</h1>
+  </header>
+  <main>
+    <table>
+      <thead>
+        <tr>
+          <th>Job</th>
+          <th>Review Item</th>
+          <th>Format</th>
+          <th>Status</th>
+          <th>Title</th>
+          <th>Package</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for job in jobs %}
+          <tr>
+            <td><a href="/jobs/{{ job.id }}/view">#{{ job.id }}</a></td>
+            <td>{{ job.review_item_id }}</td>
+            <td>{{ job.format_type }}</td>
+            <td><span class="status">{{ job.status }}</span></td>
+            <td>{{ job.title }}</td>
+            <td>{{ job.package_path }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="6">No video jobs yet. Approve a review item, then create a job.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>
+

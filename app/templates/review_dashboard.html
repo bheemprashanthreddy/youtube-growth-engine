@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CuriousSignal Review</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; color: #1d2433; background: #f6f7f9; }
+    header { background: #111827; color: white; padding: 20px 28px; }
+    main { max-width: 1180px; margin: 0 auto; padding: 24px; }
+    a { color: #155eef; text-decoration: none; }
+    .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
+    .chip { border: 1px solid #cbd5e1; background: white; border-radius: 6px; padding: 8px 10px; color: #1d2433; }
+    .chip.active { background: #155eef; color: white; border-color: #155eef; }
+    table { width: 100%; border-collapse: collapse; background: white; border: 1px solid #e5e7eb; }
+    th, td { padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: top; }
+    th { background: #f1f5f9; font-size: 13px; color: #475569; }
+    .score { font-weight: 700; }
+    .status { display: inline-block; border-radius: 6px; padding: 4px 8px; background: #e5e7eb; font-size: 12px; }
+    .risk { color: #9a3412; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CuriousSignal Review Dashboard</h1>
+  </header>
+  <main>
+    <div class="toolbar">
+      {% for value,label in [('', 'All'), ('generated', 'Generated'), ('needs_review', 'Needs review'), ('approved', 'Approved'), ('rejected', 'Rejected'), ('ready_for_render', 'Ready for render')] %}
+        <a class="chip {% if status == value %}active{% endif %}" href="/review{% if value %}?status={{ value }}{% endif %}">{{ label }}</a>
+      {% endfor %}
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Topic</th>
+          <th>Content key</th>
+          <th>Raw phrase</th>
+          <th>Pillar</th>
+          <th>Score</th>
+          <th>Quality</th>
+          <th>Quality Gate</th>
+          <th>Status</th>
+          <th>Risk Flags / Warnings</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td><a href="/review/{{ item.id }}">{{ item.topic }}</a></td>
+            <td>{{ item.content_key }}</td>
+            <td>{{ item.raw_phrase }}</td>
+            <td>{{ item.pillar }}</td>
+            <td class="score">{{ "%.1f"|format(item.final_score) }}</td>
+            <td>{{ "%.0f"|format(item.quality_score) }} / {{ item.quality_status }}</td>
+            <td class="risk">{{ item.quality_gate_status }}</td>
+            <td><span class="status">{{ item.approval_status }}</span></td>
+            <td class="risk">
+              {{ item.duplicate_status if item.duplicate_status != "unique" else "" }}
+              {{ item.source_support_warning }}
+              {{ item.lifecycle_warning }}
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="9">No review items found. Run the daily job first.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

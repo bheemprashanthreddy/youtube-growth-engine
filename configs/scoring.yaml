@@ -1,0 +1,32 @@
+scoring:
+  selected_topic_count: 5
+  min_topic_quality_score: 70
+  min_final_score: 75
+  approval_threshold: 74
+  review_threshold: 55
+  penalties:
+    vague_phrase: 30
+    unclear_subject: 35
+    incomplete_phrase: 30
+    low_curiosity: 20
+    low_explanatory_value: 30
+    high_policy_risk: 45
+    unsupported_current_event_claim: 35
+  dimensions:
+    trend_velocity: 1.2
+    cross_source_validation: 1.15
+    curiosity_gap: 1.25
+    novelty: 1.1
+    emotional_pull: 1.0
+    search_intent_strength: 1.0
+    saturation_risk: -1.0
+    monetization_fit: 0.8
+    short_format_fit: 0.9
+    long_format_fit: 0.9
+    policy_risk: -1.4
+    originality_potential: 1.2
+  risk_thresholds:
+    policy_risk_reject: 80
+    unsupported_claim_review: 55
+    misleading_title_review: 45
+    low_effort_ai_review: 40

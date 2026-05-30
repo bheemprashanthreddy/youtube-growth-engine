@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ item.topic }} - CuriousSignal Review</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; color: #1d2433; background: #f6f7f9; }
+    header { background: #111827; color: white; padding: 20px 28px; }
+    main { max-width: 980px; margin: 0 auto; padding: 24px; }
+    a { color: #155eef; text-decoration: none; }
+    section { background: white; border: 1px solid #e5e7eb; padding: 18px; margin-bottom: 14px; border-radius: 6px; }
+    h2 { font-size: 16px; margin: 0 0 10px; }
+    pre { white-space: pre-wrap; font-family: Arial, sans-serif; line-height: 1.45; }
+    .meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .field { background: #f8fafc; border: 1px solid #e5e7eb; padding: 10px; border-radius: 6px; }
+    button { border: 0; border-radius: 6px; padding: 10px 12px; background: #155eef; color: white; cursor: pointer; margin: 4px 4px 4px 0; }
+    button.reject { background: #b42318; }
+    button.secondary { background: #475569; }
+    textarea { width: 100%; min-height: 110px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; }
+    li { margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/review" style="color:#bfdbfe;">Back to dashboard</a>
+    <h1>{{ item.topic }}</h1>
+  </header>
+  <main>
+    <section class="meta">
+      <div class="field"><strong>Pillar</strong><br>{{ item.pillar }}</div>
+      <div class="field"><strong>Score</strong><br>{{ "%.1f"|format(item.final_score) }}</div>
+      <div class="field"><strong>Status</strong><br>{{ item.approval_status }}</div>
+    </section>
+    <section>
+      <h2>Topic Quality</h2>
+      <p><strong>Raw phrase:</strong> {{ item.raw_phrase }}</p>
+      <p><strong>Expanded topic:</strong> {{ item.expanded_topic }}</p>
+      <p><strong>Content key:</strong> {{ item.content_key }}</p>
+      <p><strong>Quality:</strong> {{ "%.0f"|format(item.quality_score) }} / {{ item.quality_status }}</p>
+      {% if item.source_support_warning %}<p><strong>Source support warning:</strong> {{ item.source_support_warning }}</p>{% endif %}
+      {% if item.lifecycle_warning %}<p><strong>Lifecycle warning:</strong> {{ item.lifecycle_warning }}</p>{% endif %}
+      <strong>Quality reasons</strong>
+      <ul>{% for reason in item.quality_reasons %}<li>{{ reason }}</li>{% endfor %}</ul>
+      {% if item.risk_flags %}
+        <strong>Risk flags</strong>
+        <ul>{% for flag in item.risk_flags %}<li>{{ flag }}</li>{% endfor %}</ul>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2>Review Actions</h2>
+      <form method="post" action="/review/{{ item.id }}/action">
+        <button name="action" value="approve">Approve</button>
+        <button class="reject" name="action" value="reject">Reject</button>
+        <button name="action" value="ready">Mark ready for render</button>
+        <button class="secondary" name="action" value="regenerate_script">Regenerate script</button>
+        <button class="secondary" name="action" value="regenerate_metadata">Regenerate metadata</button>
+      </form>
+    </section>
+
+    {% if item.approval_status in ["approved", "ready_for_render"] %}
+      <section>
+        <h2>Production Queue</h2>
+        <form method="post" action="/review/{{ item.id }}/action">
+          <button name="action" value="create_short_job">Create Shorts Job</button>
+          <button name="action" value="create_long_job">Create Long-Form Job</button>
+          <button name="action" value="create_both_jobs">Create Both Jobs</button>
+        </form>
+      </section>
+    {% endif %}
+
+    <section>
+      <h2>Trend Reason</h2>
+      <p>{{ item.trend_reason }}</p>
+      <h2>Scoring Explanation</h2>
+      <p>{{ item.scoring_explanation }}</p>
+    </section>
+
+    <section>
+      <h2>Shorts Script</h2>
+      <pre>{{ item.short_script }}</pre>
+    </section>
+
+    <section>
+      <h2>Long-form Outline</h2>
+      <ol>{% for line in item.long_outline %}<li>{{ line }}</li>{% endfor %}</ol>
+    </section>
+
+    <section>
+      <h2>Metadata</h2>
+      <strong>Titles</strong>
+      <ul>{% for title in item.title_options %}<li>{{ title }}</li>{% endfor %}</ul>
+      <strong>Description</strong>
+      <p>{{ item.description }}</p>
+      <strong>Hashtags</strong>
+      <p>{{ item.hashtags|join(" ") }}</p>
+      <strong>Thumbnail Ideas</strong>
+      <ul>{% for idea in item.thumbnail_ideas %}<li>{{ idea }}</li>{% endfor %}</ul>
+      <strong>Pinned Comment</strong>
+      <p>{{ item.pinned_comment }}</p>
+    </section>
+
+    <section>
+      <h2>Quality Gate</h2>
+      <p><strong>Status:</strong> {{ item.quality_gate_status }}</p>
+      <ul>{% for reason in item.quality_gate_reasons %}<li>{{ reason }}</li>{% endfor %}</ul>
+      <p><strong>AI disclosure:</strong> {{ item.ai_disclosure_recommendation }}</p>
+    </section>
+
+    <section>
+      <h2>Reviewer Notes</h2>
+      <form method="post" action="/review/{{ item.id }}/action">
+        <textarea name="notes">{{ item.reviewer_notes }}</textarea>
+        <br>
+        <button name="action" value="notes">Save notes</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
