@@ -6,7 +6,7 @@ from app.jobs.daily import run_daily_job
 from app.jobs.trend_scan import run_trend_scan
 from app.services.outputs import get_latest_json_file
 from app.services.review import clear_dev_data, dedupe_review_items, reset_invalid_ready_for_render, review_summary
-from app.services.video_job_service import create_jobs_for_approved, jobs_summary
+from app.services.video_job_service import create_jobs_for_approved, jobs_summary, normalize_existing_job_titles
 
 
 def run_daily() -> None:
@@ -127,6 +127,13 @@ def print_jobs_summary() -> None:
         print(f"- #{job['id']} {job['format_type']} review #{job['review_item_id']} :: {job['title']}")
 
 
+def normalize_job_titles() -> None:
+    init_db()
+    with SessionLocal() as db:
+        changed = normalize_existing_job_titles(db)
+    print(f"normalized video job titles: {changed}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="CuriousSignal content intelligence CLI.")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -142,6 +149,7 @@ def main() -> None:
     create_jobs_parser.add_argument("--approved", action="store_true", help="Required explicit approval scope.")
     create_jobs_parser.add_argument("--format", choices=["short", "long"], default=None, help="Optional job format.")
     subparsers.add_parser("jobs-summary", help="Print video job queue summary.")
+    subparsers.add_parser("normalize-job-titles", help="Normalize existing VideoJob titles and refresh job packages.")
     args = parser.parse_args()
 
     if args.command == "run-daily":
@@ -162,6 +170,8 @@ def main() -> None:
         create_jobs(approved=args.approved, format_type=args.format)
     elif args.command == "jobs-summary":
         print_jobs_summary()
+    elif args.command == "normalize-job-titles":
+        normalize_job_titles()
 
 
 if __name__ == "__main__":

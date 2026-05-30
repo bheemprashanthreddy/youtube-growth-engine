@@ -259,6 +259,7 @@ python -m app.cli create-jobs --approved
 python -m app.cli create-jobs --approved --format short
 python -m app.cli create-jobs --approved --format long
 python -m app.cli jobs-summary
+python -m app.cli normalize-job-titles
 ```
 
 API routes:
@@ -278,6 +279,8 @@ outputs/YYYY-MM-DD/video_jobs/{job_id}.json
 ```
 
 Each package includes the source review item, selected format, script or outline, metadata, thumbnail ideas, AI disclosure recommendation, and a structured scene plan. Phase 2 will consume these packages for rendering.
+
+Video job titles are normalized before packaging. Existing queued jobs can be cleaned with `python -m app.cli normalize-job-titles`, which removes duplicated question prefixes such as `Why Why` and avoids wrapping already complete explainer titles.
 
 Scene planning rules:
 

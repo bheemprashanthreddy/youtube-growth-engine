@@ -11,6 +11,7 @@ from app.models.content import ReviewItem, VideoJob
 from app.services.outputs import output_dir_for
 from app.services.review import serialize_review_item
 from app.services.scene_planner import create_long_scene_plan, create_short_scene_plan
+from app.utils.title_normalizer import choose_video_job_title
 
 JOB_READY_STATUSES = {"approved", "ready_for_render"}
 VALID_JOB_STATUSES = {"queued", "preparing", "ready_for_render", "rendering", "rendered", "failed"}
@@ -44,13 +45,14 @@ def create_video_job(db: Session, review_item_id: int, format_type: str) -> Vide
 
     item = serialize_review_item(review_item)
     scene_plan = _scene_plan(review_item, format_type)
-    title_options = item["title_options"] or [item["topic"]]
+    title_options = item["title_options"] or []
+    fallback_title = item.get("expanded_topic") or item["topic"]
     thumbnail_ideas = item["thumbnail_ideas"] or ["WHY NOW?"]
     job = VideoJob(
         review_item_id=review_item.id,
         format_type=format_type,
         status="ready_for_render",
-        title=title_options[0],
+        title=choose_video_job_title(title_options, str(fallback_title)),
         script=item["short_script"] if format_type == "short" else "",
         outline=json.dumps(item["long_outline"] if format_type == "long" else []),
         description=item["description"],
@@ -173,6 +175,27 @@ def jobs_summary(db: Session) -> dict[str, object]:
         "duplicate_job_count": duplicate_count,
         "top_ready_jobs": top_ready,
     }
+
+
+def normalize_existing_job_titles(db: Session) -> int:
+    jobs = list_video_jobs(db)
+    changed = 0
+    for job in jobs:
+        review_item = db.get(ReviewItem, job.review_item_id)
+        if review_item is None:
+            continue
+        item = serialize_review_item(review_item)
+        clean_title = choose_video_job_title([job.title, *item["title_options"]], item.get("expanded_topic") or item["topic"])
+        if clean_title != job.title:
+            job.title = clean_title
+            db.add(job)
+            changed += 1
+    db.commit()
+    for job in jobs:
+        review_item = db.get(ReviewItem, job.review_item_id)
+        if review_item is not None:
+            save_video_job_package(job, review_item)
+    return changed
 
 
 def create_jobs_for_approved(db: Session, format_type: str | None = None) -> list[VideoJob]:
