@@ -73,6 +73,14 @@ def _migrate_sqlite_video_jobs() -> None:
         return
     columns = {
         "package_path": "TEXT DEFAULT ''",
+        "selected_thumbnail_path": "TEXT DEFAULT ''",
+        "metadata_reviewed": "BOOLEAN DEFAULT 0",
+        "ai_disclosure_reviewed": "BOOLEAN DEFAULT 0",
+        "source_license_reviewed": "BOOLEAN DEFAULT 0",
+        "voice_audio_reviewed": "BOOLEAN DEFAULT 0",
+        "upload_review_approved": "BOOLEAN DEFAULT 0",
+        "upload_reviewed_at": "DATETIME",
+        "upload_review_notes": "TEXT DEFAULT ''",
     }
     with engine.begin() as conn:
         existing = {row[1] for row in conn.execute(text("PRAGMA table_info(video_jobs)"))}

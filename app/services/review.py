@@ -119,10 +119,10 @@ def regenerate_metadata(db: Session, item: ReviewItem) -> ReviewItem:
     topic = item.topic
     item.title_options = json.dumps(
         [
-            f"Why {topic} Is Suddenly Everywhere",
+            topic if topic.lower().startswith(("why ", "how ", "what ")) else f"Why {topic} Is Changing Faster Than People Realize",
             f"The Hidden Signal Behind {topic}",
             f"What People Miss About {topic}",
-            f"{topic}: The Trend Explained",
+            f"{topic}: The Shift Underneath",
             f"The System Behind {topic}",
         ]
     )
@@ -131,7 +131,7 @@ def regenerate_metadata(db: Session, item: ReviewItem) -> ReviewItem:
         "and what should be verified before accepting the trend at face value."
     )
     item.hashtags = json.dumps(["#CuriousSignal", "#Trends", "#Explained", "#InternetCulture"])
-    item.thumbnail_ideas = json.dumps(["WHY NOW?", "HIDDEN SIGNAL", "TREND EXPLAINED"])
+    item.thumbnail_ideas = json.dumps(["WHAT CHANGED?", "THE HIDDEN SHIFT", "FOLLOW THE SIGNAL"])
     item.updated_at = datetime.now(UTC)
     item.approval_status = "needs_review"
     db.add(item)
@@ -230,15 +230,17 @@ def reset_invalid_ready_for_render(db: Session) -> int:
 
 
 def clear_dev_data(db: Session) -> dict[str, int]:
-    from app.models.content import ContentOutput, DailyRun, Topic, VideoJob
+    from app.models.content import ContentOutput, DailyRun, Topic, VideoJob, YouTubeUpload
 
     counts = {
+        "youtube_uploads": len(db.execute(select(YouTubeUpload)).scalars().all()),
         "video_jobs": len(db.execute(select(VideoJob)).scalars().all()),
         "review_items": len(db.execute(select(ReviewItem)).scalars().all()),
         "content_outputs": len(db.execute(select(ContentOutput)).scalars().all()),
         "topics": len(db.execute(select(Topic)).scalars().all()),
         "daily_runs": len(db.execute(select(DailyRun)).scalars().all()),
     }
+    db.execute(delete(YouTubeUpload))
     db.execute(delete(VideoJob))
     db.execute(delete(ReviewItem))
     db.execute(delete(ContentOutput))

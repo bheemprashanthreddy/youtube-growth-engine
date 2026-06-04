@@ -26,6 +26,111 @@
       <p><strong>Status:</strong> {{ job.status }}</p>
       <p><strong>Render readiness:</strong> {{ "ready" if job.status == "ready_for_render" else "not ready" }}</p>
       <p><strong>Package:</strong> {{ job.package_path }}</p>
+      {% if job.status == "ready_for_render" %}
+        <form method="post" action="/jobs/{{ job.id }}/action">
+          <button name="action" value="render_preview">Render Preview</button>
+          <button name="action" value="render">Render Native Job</button>
+          <button name="action" value="thumbnail_variants">Generate Thumbnail Variants</button>
+          {% if moneyprinterturbo_status.enabled %}
+            <button name="action" value="render_moneyprinterturbo">Render with MoneyPrinterTurbo</button>
+          {% endif %}
+        </form>
+      {% elif job.status == "rendering" %}
+        <p><strong>Rendering status:</strong> rendering</p>
+      {% elif job.status == "rendered" %}
+        <p><strong>Render output:</strong> {{ job.render_output_path }}</p>
+        <p><strong>Thumbnail output:</strong> {{ job.thumbnail_output_path }}</p>
+        <p><strong>Render report:</strong> renders/reports/{{ job.id }}.json</p>
+      {% elif job.status == "failed" %}
+        <p><strong>Error:</strong> {{ job.error_message }}</p>
+      {% endif %}
+    </section>
+    <section>
+      <h2>Render Engine</h2>
+      <p><strong>Selected:</strong> {{ render_engine_status.selected_engine if render_engine_status else "native" }}</p>
+      <p><strong>Native available:</strong> {{ render_engine_status.native_available if render_engine_status else true }}</p>
+      <p><strong>MoneyPrinterTurbo enabled:</strong> {{ moneyprinterturbo_status.enabled if moneyprinterturbo_status else false }}</p>
+      <p><strong>MoneyPrinterTurbo reachable:</strong> {{ moneyprinterturbo_status.reachable if moneyprinterturbo_status else false }}</p>
+      <p><strong>Base URL:</strong> {{ moneyprinterturbo_status.base_url if moneyprinterturbo_status else "" }}</p>
+      {% if render_report.render_engine %}
+        <p><strong>Last render engine:</strong> {{ render_report.render_engine }}</p>
+        <p><strong>External service used:</strong> {{ render_report.external_service_used }}</p>
+      {% endif %}
+      {% if moneyprinterturbo_request %}
+        <h3>MoneyPrinterTurbo request preview</h3>
+        <pre>{{ moneyprinterturbo_request }}</pre>
+      {% endif %}
+    </section>
+    <section>
+      <h2>Visual Assets</h2>
+      <p><strong>Provider:</strong> {{ visual_provider.selected_provider if visual_provider else "unknown" }}</p>
+      <p><strong>Active:</strong> {{ visual_provider.active if visual_provider else false }}</p>
+      <p><strong>Fallback mode:</strong> {{ visual_provider.fallback_mode if visual_provider else true }}</p>
+      <p><strong>Cache:</strong> {{ visual_provider.cache_directory if visual_provider else "" }}</p>
+      {% if render_report.voice %}
+        <h3>Voice</h3>
+        <p><strong>Provider:</strong> {{ render_report.voice.provider }}</p>
+        <p><strong>Profile:</strong> {{ render_report.voice.voice_profile }}</p>
+        <p><strong>Fallback:</strong> {{ render_report.voice.fallback_used }}</p>
+      {% endif %}
+      {% if render_report.ai_visuals_used %}
+        <h3>AI visuals</h3>
+        <p><strong>Provider:</strong> {{ render_report.ai_visual_provider }}</p>
+        <p><strong>Model:</strong> {{ render_report.ai_visual_model }}</p>
+        <p><strong>Disclosure review:</strong> {{ render_report.ai_disclosure_recommended }}</p>
+        <p><strong>Priority used:</strong> {{ render_report.visual_priority_used }}</p>
+      {% endif %}
+      {% if render_report.assets_used %}
+        <h3>Assets used</h3>
+        <ul>
+          {% for asset in render_report.assets_used %}
+            <li>{{ asset.provider }} / {{ asset.asset_type }} / {{ asset.query }}{% if asset.source_url %} - {{ asset.source_url }}{% endif %}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% if render_report.thumbnail_variants %}
+        <h3>Thumbnail variants</h3>
+        <ul>{% for path in render_report.thumbnail_variants %}<li>{{ path }}</li>{% endfor %}</ul>
+      {% endif %}
+    </section>
+    <section>
+      <h2>Private YouTube Upload</h2>
+      <p><strong>Enabled:</strong> {{ youtube_status.upload_enabled if youtube_status else false }}</p>
+      <p><strong>Privacy:</strong> {{ youtube_status.privacy_status if youtube_status else "private" }}</p>
+      <p><strong>Authenticated:</strong> {{ youtube_status.authenticated if youtube_status else false }}</p>
+      <p><strong>Final review approved:</strong> {{ upload_checklist.final_review_approved if upload_checklist else false }}</p>
+      <p><strong>Selected thumbnail:</strong> {{ upload_checklist.thumbnail_path if upload_checklist else "" }}</p>
+      {% if render_report.thumbnail_variants %}
+        <form method="post" action="/jobs/{{ job.id }}/action">
+          <button name="action" value="select_thumbnail_a">Select A</button>
+          <button name="action" value="select_thumbnail_b">Select B</button>
+          <button name="action" value="select_thumbnail_c">Select C</button>
+        </form>
+      {% endif %}
+      <h3>Upload checklist</h3>
+      {% if upload_checklist %}
+        <ul>
+          {% for check in upload_checklist.checks %}
+            <li>{{ "PASS" if check.passed else "BLOCK" }} - {{ check.label }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% if upload_checklist.warnings %}
+        <p><strong>Warnings:</strong></p>
+        <ul>{% for warning in upload_checklist.warnings %}<li>{{ warning }}</li>{% endfor %}</ul>
+      {% endif %}
+      {% if upload_checklist.blockers %}
+        <p><strong>Blockers:</strong></p>
+        <ul>{% for blocker in upload_checklist.blockers %}<li>{{ blocker }}</li>{% endfor %}</ul>
+      {% endif %}
+      {% if job.status == "rendered" %}
+        <form method="post" action="/jobs/{{ job.id }}/action">
+          <button name="action" value="mark_upload_reviewed">Mark Upload Reviewed</button>
+          {% if upload_checklist.passed %}
+            <button name="action" value="upload_private">Upload Privately to YouTube</button>
+          {% endif %}
+        </form>
+      {% endif %}
     </section>
     <section>
       <h2>{{ job.title }}</h2>
@@ -50,4 +155,3 @@
   </main>
 </body>
 </html>
-

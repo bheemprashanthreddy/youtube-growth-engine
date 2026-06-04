@@ -4,6 +4,7 @@ from app.db.session import SessionLocal, init_db
 from app.jobs.daily import run_daily_job
 from app.models.content import ReviewItem
 from app.providers.trends.base import make_trend_item
+from app.providers.trends.manual_seed_provider import ManualSeedProvider
 from app.schemas.content import ContentPlan, OpportunityScore, QualityGateResult
 from app.services.review import (
     build_content_key,
@@ -17,7 +18,8 @@ from app.services.review import (
 from app.services.topic_expander import expand_trend_item
 
 
-def test_run_daily_twice_does_not_create_duplicate_review_items() -> None:
+def test_run_daily_twice_does_not_create_duplicate_review_items(monkeypatch) -> None:
+    monkeypatch.setattr("app.services.trend_ingestion.PROVIDER_CLASSES", {"manual_seed": ManualSeedProvider})
     init_db()
     with SessionLocal() as db:
         clear_dev_data(db)

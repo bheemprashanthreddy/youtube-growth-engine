@@ -47,7 +47,7 @@ def create_video_job(db: Session, review_item_id: int, format_type: str) -> Vide
     scene_plan = _scene_plan(review_item, format_type)
     title_options = item["title_options"] or []
     fallback_title = item.get("expanded_topic") or item["topic"]
-    thumbnail_ideas = item["thumbnail_ideas"] or ["WHY NOW?"]
+    thumbnail_ideas = item["thumbnail_ideas"] or ["WHAT CHANGED?"]
     job = VideoJob(
         review_item_id=review_item.id,
         format_type=format_type,
@@ -134,6 +134,14 @@ def serialize_video_job(job: VideoJob) -> dict[str, object]:
         "scene_plan": _loads(job.scene_plan_json, {}),
         "render_output_path": job.render_output_path,
         "thumbnail_output_path": job.thumbnail_output_path,
+        "selected_thumbnail_path": job.selected_thumbnail_path,
+        "metadata_reviewed": job.metadata_reviewed,
+        "ai_disclosure_reviewed": job.ai_disclosure_reviewed,
+        "source_license_reviewed": job.source_license_reviewed,
+        "voice_audio_reviewed": job.voice_audio_reviewed,
+        "upload_review_approved": job.upload_review_approved,
+        "upload_reviewed_at": job.upload_reviewed_at.isoformat() if job.upload_reviewed_at else "",
+        "upload_review_notes": job.upload_review_notes,
         "error_message": job.error_message,
         "package_path": job.package_path,
         "created_at": job.created_at.isoformat(),
@@ -170,6 +178,7 @@ def jobs_summary(db: Session) -> dict[str, object]:
         "short_jobs": formats["short"],
         "long_jobs": formats["long"],
         "ready_for_render": counts["ready_for_render"],
+        "rendering": counts["rendering"],
         "rendered": counts["rendered"],
         "failed": counts["failed"],
         "duplicate_job_count": duplicate_count,

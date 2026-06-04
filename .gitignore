@@ -5,6 +5,7 @@ credentials.json
 outputs/
 renders/
 storage/
+storage/youtube/
 .venv/
 __pycache__/
 .pytest_cache/

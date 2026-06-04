@@ -7,21 +7,24 @@ def create_short_scene_plan(review_item) -> dict[str, object]:
     scene_count = max(6, min(10, len(script_lines) or 6))
     duration = 54
     per_scene = max(5, round(duration / scene_count))
+    beats = _short_visual_beats(item)
     scenes = []
     for index in range(scene_count):
         voiceover = script_lines[index % len(script_lines)] if script_lines else item["topic"]
+        beat = beats[index % len(beats)]
         scenes.append(
             {
                 "scene_number": index + 1,
                 "duration_seconds": per_scene,
                 "voiceover": voiceover,
-                "visual_type": _visual_type(index),
-                "visual_prompt": f"Vertical documentary-style visual explaining {item['topic']}; scene {index + 1}; clean, source-neutral, no copyrighted media.",
-                "on_screen_text": _short_text(item, index),
+                "visual_type": beat["visual_type"],
+                "layout": beat["layout"],
+                "visual_prompt": beat["visual_prompt"],
+                "on_screen_text": beat["on_screen_text"],
                 "broll_keywords": _keywords(item),
-                "caption_emphasis": _caption_emphasis(index),
+                "caption_emphasis": beat["caption_emphasis"],
                 "transition_style": "quick cut" if index < scene_count - 1 else "clean outro",
-                "retention_note": "Keep the question moving; reveal one new piece of context before the next cut.",
+                "retention_note": beat["retention_note"],
             }
         )
     return {
@@ -74,13 +77,48 @@ def _visual_type(index: int) -> str:
 
 
 def _short_text(item: dict[str, object], index: int) -> str:
-    ideas = item["thumbnail_ideas"] or ["WHY NOW?"]
-    if index == 0:
-        return ideas[0]
-    if index == 1:
-        return "THE HIDDEN SIGNAL"
-    return item["topic"][:48]
+    return _short_visual_beats(item)[index % 6]["on_screen_text"]
 
 
 def _caption_emphasis(index: int) -> str:
     return ["hook", "contrast", "proof", "payoff"][index % 4]
+
+
+def _short_visual_beats(item: dict[str, object]) -> list[dict[str, str]]:
+    topic = item.get("expanded_topic") or item["topic"]
+    text = str(topic).lower()
+    if "ai" in text and "search" in text:
+        lines = [
+            ("hook", "Search is moving\nfrom links to answers", "search bar transforms into AI answer box"),
+            ("split_metaphor", "Blue links are\nbecoming invisible", "browser results fade behind a glowing answer panel"),
+            ("claim_card", "Publishers lose\nthe click", "attention arrows route away from link cards"),
+            ("timeline", "One habit is\nbeing rewritten", "timeline from keyword search to answer engine"),
+            ("process", "Answers now choose\nwhat matters", "ranking cards flow into a single AI summary"),
+            ("payoff", "Search just became\nan attention gatekeeper", "network nodes converge into one highlighted answer"),
+        ]
+    else:
+        short_topic = _compact_topic(str(topic))
+        lines = [
+            ("hook", f"{short_topic}\nis the signal", "topic card breaks into system layers"),
+            ("split_metaphor", "The visible trend\nis only the surface", "two-layer diagram with surface and hidden system"),
+            ("claim_card", "Follow the incentives\nunderneath", "money, platform, behavior cards connected by arrows"),
+            ("timeline", "The timing\nchanged first", "timeline with one highlighted acceleration point"),
+            ("process", "Small defaults\nshape behavior", "phone frame and data cards flowing into decision path"),
+            ("payoff", "The question is\nwhat changed", "question mark resolves into signal dashboard"),
+        ]
+    return [
+        {
+            "layout": layout,
+            "on_screen_text": line,
+            "visual_type": layout.replace("_", " "),
+            "visual_prompt": f"Original abstract motion graphic: {prompt}. Dark premium tech explainer style, cyan accents, no copyrighted media.",
+            "caption_emphasis": _caption_emphasis(index),
+            "retention_note": "Reveal one concrete mechanism and move before the viewer can predict the next beat.",
+        }
+        for index, (layout, line, prompt) in enumerate(lines)
+    ]
+
+
+def _compact_topic(topic: str) -> str:
+    words = [word for word in topic.replace("Why ", "").split() if len(word) > 2]
+    return " ".join(words[:4]) or topic[:28]

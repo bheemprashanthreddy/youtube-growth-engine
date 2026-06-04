@@ -106,8 +106,38 @@ class VideoJob(Base):
     scene_plan_json: Mapped[str] = mapped_column(Text)
     render_output_path: Mapped[str] = mapped_column(Text, default="")
     thumbnail_output_path: Mapped[str] = mapped_column(Text, default="")
+    selected_thumbnail_path: Mapped[str] = mapped_column(Text, default="")
+    metadata_reviewed: Mapped[bool] = mapped_column(default=False)
+    ai_disclosure_reviewed: Mapped[bool] = mapped_column(default=False)
+    source_license_reviewed: Mapped[bool] = mapped_column(default=False)
+    voice_audio_reviewed: Mapped[bool] = mapped_column(default=False)
+    upload_review_approved: Mapped[bool] = mapped_column(default=False)
+    upload_reviewed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    upload_review_notes: Mapped[str] = mapped_column(Text, default="")
     error_message: Mapped[str] = mapped_column(Text, default="")
     package_path: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+    )
+
+
+class YouTubeUpload(Base):
+    __tablename__ = "youtube_uploads"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    job_id: Mapped[int] = mapped_column(ForeignKey("video_jobs.id"), index=True)
+    youtube_video_id: Mapped[str] = mapped_column(String(120), default="", index=True)
+    youtube_upload_status: Mapped[str] = mapped_column(String(30), default="not_uploaded", index=True)
+    youtube_privacy_status: Mapped[str] = mapped_column(String(30), default="private")
+    youtube_upload_url: Mapped[str] = mapped_column(Text, default="")
+    youtube_uploaded_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    youtube_upload_error: Mapped[str] = mapped_column(Text, default="")
+    youtube_upload_report_path: Mapped[str] = mapped_column(Text, default="")
+    youtube_thumbnail_uploaded: Mapped[bool] = mapped_column(default=False)
+    youtube_metadata_json: Mapped[str] = mapped_column(Text, default="{}")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
